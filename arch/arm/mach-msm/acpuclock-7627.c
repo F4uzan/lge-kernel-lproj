@@ -190,41 +190,23 @@ static struct clkctl_acpu_speed pll0_960_pll1_196_pll2_800_pll4_0[] = {
 
 /* 7627a PLL2 @ 1200MHz with GSM capable modem */
 static struct clkctl_acpu_speed pll0_960_pll1_245_pll2_1200_pll4_800[] = {
-	#ifdef CONFIG_MSM7X27A_UNDERVOLT 
 	{ 0, 19200, ACPU_PLL_TCXO, 0, 0, 2400, 3, 0, 30720 },
 	{ 0, 61440, ACPU_PLL_1, 1, 3,  7680, 3, 1,  61440 },
-	{ 1, 122880, ACPU_PLL_1, 1, 1, 15360, 3, 1,  61440 },
-	{ 1, 245760, ACPU_PLL_1, 1, 0, 30720, 3, 2,  61440 },
-	{ 0, 300000, ACPU_PLL_2, 2, 3, 37500, 3, 3, 122880 },
-	{ 1, 320000, ACPU_PLL_0, 4, 2, 40000, 3, 3, 122880 },
-	{ 0, 400000, ACPU_PLL_4, 6, 1, 50000, 3, 3, 122880 },
-	{ 1, 480000, ACPU_PLL_0, 4, 1, 60000, 3, 4, 122880 },
-	{ 1, 600000, ACPU_PLL_2, 2, 1, 75000, 3, 5, 160000 },
-	{ 1, 800000, ACPU_PLL_4, 6, 0, 100000, 3, 6, 200000 }, 
-	#else
-   	{ 0, 19200, ACPU_PLL_TCXO, 0, 0, 2400, 3, 0, 30720 },
-	{ 0, 61440, ACPU_PLL_1, 1, 3,  7680, 3, 1,  61440 },
-	{ 1, 122880, ACPU_PLL_1, 1, 1, 15360, 3, 2,  61440 },
+	{ 1, 122880, ACPU_PLL_1, 1, 1,  15360, 3, 2,  61440 },
 	{ 1, 245760, ACPU_PLL_1, 1, 0, 30720, 3, 3,  61440 },
 	{ 0, 300000, ACPU_PLL_2, 2, 3, 37500, 3, 4, 122880 },
 	{ 1, 320000, ACPU_PLL_0, 4, 2, 40000, 3, 4, 122880 },
 	{ 0, 400000, ACPU_PLL_4, 6, 1, 50000, 3, 4, 122880 },
 	{ 1, 480000, ACPU_PLL_0, 4, 1, 60000, 3, 5, 122880 },
 	{ 1, 600000, ACPU_PLL_2, 2, 1, 75000, 3, 6, 160000 },
-	{ 1, 800000, ACPU_PLL_4, 6, 0, 100000, 3, 7, 200000 }, 
-	#endif
-	#ifdef CONFIG_MSM7X27A_OVERCLOCK
-	#ifdef CONFIG_MSM7X27A_UNDERVOLT 
-    	{ 1, 950000, ACPU_PLL_2, 2, 3, 118750, 3, 6, 200000 },
-	#else
-	{ 1, 950000, ACPU_PLL_2, 2, 3, 118750, 3, 7, 200000 },
-	#endif
-	{ 1, 1056000, ACPU_PLL_2, 2, 3, 132000, 3, 7, 200000 },	
-	#ifdef CONFIG_MSM7X27A_BACONMAKER
-    	{ 1, 1094400, ACPU_PLL_2, 2, 3, 182400, 2, 7, 200000 },
-	{ 1, 1104000, ACPU_PLL_2, 2, 3, 184000, 2, 7, 200000 },
-	#endif
-	#endif
+	{ 1, 800000, ACPU_PLL_4, 6, 0, 100000, 3, 7, 200000 },
+#ifdef CONFIG_MSM7X27A_OVERCLOCK
+        { 1, 900000, ACPU_PLL_2, 2, 0, 112500, 3, 7, 200000 },
+        { 1, 950000, ACPU_PLL_2, 2, 0, 118750, 3, 7, 200000 },
+        { 1, 1000000, ACPU_PLL_2, 2, 0, 125000, 3, 7, 200000 },        
+        { 1, 1050000, ACPU_PLL_2, 2, 0, 131250, 3, 7, 200000 },
+        { 1, 1100000, ACPU_PLL_2, 2, 0, 137500, 3, 7, 200000 },
+#endif	
 	{ 0 }
 };
 
@@ -240,6 +222,13 @@ static struct clkctl_acpu_speed pll0_960_pll1_196_pll2_1200_pll4_800[] = {
 	{ 1, 480000, ACPU_PLL_0, 4, 1, 60000, 3, 5, 120000 },
 	{ 1, 600000, ACPU_PLL_2, 2, 1, 75000, 3, 6, 160000 },
 	{ 1, 800000, ACPU_PLL_4, 6, 0, 100000, 3, 7, 200000 },
+#ifdef CONFIG_MSM7X27A_OVERCLOCK
+        { 1, 900000, ACPU_PLL_2, 2, 0, 112500, 3, 7, 200000 },
+        { 1, 950000, ACPU_PLL_2, 2, 0, 118750, 3, 7, 200000 },
+        { 1, 1000000, ACPU_PLL_2, 2, 0, 125000, 3, 7, 200000 },        
+        { 1, 1050000, ACPU_PLL_2, 2, 0, 131250, 3, 7, 200000 },
+        { 1, 1100000, ACPU_PLL_2, 2, 0, 137500, 3, 7, 200000 },
+#endif
 	{ 0 }
 };
 
@@ -254,22 +243,7 @@ static struct clkctl_acpu_speed pll0_960_pll1_245_pll2_1200_pll4_1008[] = {
 	{ 1, 480000, ACPU_PLL_0, 4, 1, 60000, 3, 5, 122880 },
 	{ 0, 504000, ACPU_PLL_4, 6, 1, 63000, 3, 6, 160000 },
 	{ 1, 600000, ACPU_PLL_2, 2, 1, 75000, 3, 6, 160000 },
-	#ifdef CONFIG_MSM7X27A_UNDERVOLT 
-	{ 1, 1008000, ACPU_PLL_4, 6, 0, 126000, 3, 6, 200000},
-	#else
-   	{ 1, 1008000, ACPU_PLL_4, 6, 0, 126000, 3, 7, 200000},
-	#endif
-	#ifdef CONFIG_MSM7X27A_OVERCLOCK
-    	{ 1, 1100000, ACPU_PLL_2, 2, 3, 137500, 3, 7, 200000 },
-	{ 1, 1150000, ACPU_PLL_2, 2, 3, 143750, 3, 7, 200000 },
-    	{ 1, 1200000, ACPU_PLL_2, 2, 3, 150000, 3, 7, 200000 },
-	{ 1, 1228800, ACPU_PLL_2, 2, 3, 153600, 3, 7, 200000 },	
-	#ifdef CONFIG_MSM7X27A_BACONMAKER
-    	{ 1, 1250000, ACPU_PLL_2, 2, 3, 156250, 3, 7, 200000 },
-	{ 1, 1267200, ACPU_PLL_2, 2, 3, 158400, 2, 7, 200000 },
-    	{ 1, 1300000, ACPU_PLL_2, 2, 3, 162500, 2, 7, 200000 },
-	#endif
-	#endif
+	{ 1, 1008000, ACPU_PLL_4, 6, 0, 126000, 3, 7, 200000},
 	{ 0 }
 };
 
@@ -488,22 +462,7 @@ static struct clkctl_acpu_speed pll0_960_pll1_737_pll2_1200_pll4_1008[] = {
 	{ 1, 480000, ACPU_PLL_0, 4, 1, 60000, 3, 5, 122880 },
 	{ 0, 504000, ACPU_PLL_4, 6, 1, 63000, 3, 6, 160000 },
 	{ 1, 600000, ACPU_PLL_2, 2, 1, 75000, 3, 6, 160000 },
-	#ifdef CONFIG_MSM7X27A_UNDERVOLT 
-	{ 1, 1008000, ACPU_PLL_4, 6, 0, 126000, 3, 6, 200000},
-	#else
-   	{ 1, 1008000, ACPU_PLL_4, 6, 0, 126000, 3, 7, 200000},
-	#endif
-	#ifdef CONFIG_MSM7X27A_OVERCLOCK
-    	{ 1, 1100000, ACPU_PLL_2, 2, 3, 137500, 3, 7, 220000 },
-	{ 1, 1150000, ACPU_PLL_2, 2, 3, 143750, 3, 7, 220000 },
-    	{ 1, 1200000, ACPU_PLL_2, 2, 3, 150000, 3, 7, 220000 },
-	{ 1, 1228800, ACPU_PLL_2, 2, 3, 153600, 3, 7, 220000 },	
-	#ifdef CONFIG_MSM7X27A_BACONMAKER
-    	{ 1, 1250000, ACPU_PLL_2, 2, 0, 156250, 3, 7, 240000 },
-	{ 1, 1267200, ACPU_PLL_2, 2, 0, 158400, 2, 7, 240000 },
-    	{ 1, 1300000, ACPU_PLL_2, 2, 0, 162500, 2, 7, 240000 },
-	#endif
-	#endif
+	{ 1, 1008000, ACPU_PLL_4, 6, 0, 126000, 3, 7, 200000},
 	{ 0 }
 };
 
@@ -670,7 +629,7 @@ static void acpuclk_set_div(const struct clkctl_acpu_speed *hunt_s)
 {
 	uint32_t reg_clkctl, reg_clksel, clk_div, src_sel;
 
-	#ifdef CONFIG_MSM7X27A_OVERCLOCK
+        #ifdef CONFIG_MSM7X27A_OVERCLOCK	
 	uint32_t a11_div;	
 	#endif
 
@@ -678,26 +637,14 @@ static void acpuclk_set_div(const struct clkctl_acpu_speed *hunt_s)
 
 	/* AHB_CLK_DIV */
 	clk_div = (reg_clksel >> 1) & 0x03;
-	#ifdef CONFIG_MSM7X27A_OVERCLOCK
-	#ifdef CONFIG_MACH_MSM7X25A_M4
+#ifdef CONFIG_MSM7X27A_OVERCLOCK
 	a11_div=hunt_s->a11clk_src_div;
         if(hunt_s->a11clk_khz>800000) {
         a11_div=0;
         writel(hunt_s->a11clk_khz/19200, MSM_CLK_CTL_BASE+0x33C);
-        cpu_relax();
         udelay(50);
-	}
-	#endif
-	#ifdef CONFIG_MACH_MSM7X27A_U0
-	a11_div=hunt_s->a11clk_src_div;
-        if(hunt_s->a11clk_khz>1008000) {
-        a11_div=0;
-        writel(hunt_s->a11clk_khz/19200, MSM_CLK_CTL_BASE+0x33C);
-        cpu_relax();
-        udelay(50);
-	}
-	#endif
-	#endif
+}
+#endif
 	/* CLK_SEL_SRC1NO */
 	src_sel = reg_clksel & 1;
 
@@ -715,11 +662,7 @@ static void acpuclk_set_div(const struct clkctl_acpu_speed *hunt_s)
 	reg_clkctl = readl_relaxed(A11S_CLK_CNTL_ADDR);
 	reg_clkctl &= ~(0xFF << (8 * src_sel));
 	reg_clkctl |= hunt_s->a11clk_src_sel << (4 + 8 * src_sel);
-	#ifdef CONFIG_MSM7X27A_OVERCLOCK  
-	reg_clkctl |= a11_div << (0 + 8 * src_sel);  
-	#else
-   	reg_clkctl |= hunt_s->a11clk_src_div << (0 + 8 * src_sel);
-	#endif
+	reg_clkctl |= hunt_s->a11clk_src_div << (0 + 8 * src_sel);
 	writel_relaxed(reg_clkctl, A11S_CLK_CNTL_ADDR);
 
 	/* Program clock source selection */
@@ -1039,55 +982,6 @@ static void __devinit acpuclk_hw_init(void)
 
 	pr_info("ACPU running at %d KHz\n", speed->a11clk_khz);
 }
-
-#ifdef CONFIG_CPU_FREQ_VDD_LEVELS
-
-ssize_t acpuclk_get_vdd_levels_str(char *buf) {
-
-	int i, len = 0;
-
-	if (buf) {
-		mutex_lock(&drv_state.lock);
-		#ifdef CONFIG_MACH_MSM7X25A_M4
-		for (i = 0; pll0_960_pll1_245_pll2_1200_pll4_800[i].a11clk_khz; i++) {
-			/* updated to use uv required by 7x27 architecture - nAa */
-			if (pll0_960_pll1_245_pll2_1200_pll4_800[i].use_for_scaling)
-			len += sprintf(buf + len, "%8u: %8d\n", pll0_960_pll1_245_pll2_1200_pll4_800[i].a11clk_khz, pll0_960_pll1_245_pll2_1200_pll4_800[i].vdd);
-		}
-		#endif
-		#ifdef CONFIG_MACH_MSM7X27A_U0
-		for (i = 0; pll0_960_pll1_245_pll2_1200_pll4_1008[i].a11clk_khz; i++) {
-			/* updated to use uv required by 7x27 architecture - nAa */
-			if (pll0_960_pll1_245_pll2_1200_pll4_1008[i].use_for_scaling)
-			len += sprintf(buf + len, "%8u: %8d\n", pll0_960_pll1_245_pll2_1200_pll4_1008[i].a11clk_khz, pll0_960_pll1_245_pll2_1200_pll4_1008[i].vdd);
-		}
-		#endif
-
-		mutex_unlock(&drv_state.lock);
-	}
-	return len;
-}
-
-void acpuclk_set_vdd(unsigned int khz, int vdd_uv) {
-	int i;
-	mutex_lock(&drv_state.lock);
-	#ifdef CONFIG_MACH_MSM7X25A_M4
-	for (i = 0; pll0_960_pll1_245_pll2_1200_pll4_800[i].a11clk_khz; i++) {
-		if ( pll0_960_pll1_245_pll2_1200_pll4_800[i].a11clk_khz == khz)
-			pll0_960_pll1_245_pll2_1200_pll4_800[i].vdd = vdd_uv;
-	}
-	#endif
-	#ifdef CONFIG_MACH_MSM7X27A_U0
-	for (i = 0; pll0_960_pll1_245_pll2_1200_pll4_1008[i].a11clk_khz; i++) {
-		if ( pll0_960_pll1_245_pll2_1200_pll4_1008[i].a11clk_khz == khz)
-			pll0_960_pll1_245_pll2_1200_pll4_1008[i].vdd = vdd_uv;
-	}
-	#endif
-
-
-	mutex_unlock(&drv_state.lock);
-}
-#endif	/* CONFIG_CPU_FREQ_VDD_LEVELS */
 
 static unsigned long acpuclk_7627_get_rate(int cpu)
 {

@@ -34,7 +34,9 @@ config ARCH_MSM7X27
 	select MULTI_IRQ_HANDLER
 	select MSM_PROC_COMM_REGULATOR
 	select CLEANCACHE
+	select QCACHE
 	select MSM_PM2 if PM
+	select MSM_RUN_QUEUE_STATS if MSM_SOC_REV_A
 	select DONT_MAP_HOLE_AFTER_MEMBANK0
 	select MIGHT_HAVE_CACHE_L2X0
 	select MSM_MODEM_RESTART
@@ -166,6 +168,7 @@ config ARCH_MSM8960
 	select ARCH_SPARSEMEM_ENABLE
 	select ARCH_HAS_HOLES_MEMORYMODEL
 	select CLEANCACHE
+	select QCACHE
 	select MSM_MULTIMEDIA_USE_ION
 	select MULTI_IRQ_HANDLER
 	select MSM_PM8X60 if PM
@@ -225,6 +228,7 @@ config ARCH_APQ8064
 	select CPU_HAS_L2_PMU
 	select HOLES_IN_ZONE if SPARSEMEM
 	select CLEANCACHE
+	select QCACHE
 	select MIGHT_HAVE_PCI
 	select ARCH_SUPPORTS_MSI
 	select ARM_HAS_SG_CHAIN
@@ -1560,34 +1564,20 @@ config MSM_CPU_FREQ_SET_MIN_MAX
 config MSM_CPU_FREQ_MAX
 	int "Max CPU Frequency"
 	depends on MSM_CPU_FREQ_SET_MIN_MAX
-	default 800000
+	default 384000
 
 config MSM_CPU_FREQ_MIN
 	int "Min CPU Frequency"
 	depends on MSM_CPU_FREQ_SET_MIN_MAX
-	default 122880
+	default 245760
 
 config MSM7X27A_OVERCLOCK
 	bool "Enable SoC overclocking for MSM7x27A"
 	depends on MSM_CPU_FREQ_SET_MIN_MAX
-        depends on MACH_MSM7X25A_M4 || MACH_MSM7X27A_U0
+        depends on ARCH_MSM7X27A
 	default n
 	help
 	  Enable support for non-standard msm7x27A acpuclock frequencies/voltages.
-
-config MSM7X27A_BACONMAKER
-	bool "Enable SoC overclocking to dangerous frequencies"
-	depends on MSM7X27A_OVERCLOCK
-	default n
-	help
-	  Enable support for dangerous msm7x27A acpuclock frequencies/voltages.
-
-config MSM7X27A_UNDERVOLT
-	bool "Enable stock freq undervolt for MSM7x27A"
-        depends on MACH_MSM7X25A_M4 || MACH_MSM7X27A_U0
-	default n
-	help
-	  Enable Undervolting of the default max freq
 
 endif # CPU_FREQ_MSM
 
@@ -2507,14 +2497,6 @@ config MSM_FIQ
 	  if apps is not responding and holding lock with irqs disabled.
 	  Modem will then generate an raise a FIQ on this line before sending
 	  SMSM reset
-
-config FORCE_FAST_CHARGE
-	bool "Force AC charge mode at will"
-	default y
-	help
-	  A simple sysfs interface to force adapters that
-	  are detected as USB to charge as AC.
-
 endif
 
 ### [LGE_BSP_S] jihyun2.jang@lge.com, 20130212 - RT8966A miniABB regulator

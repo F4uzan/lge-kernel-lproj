@@ -908,14 +908,13 @@ static struct resource kgsl_3d0_resources[] = {
 
 static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 	.pwrlevel = {
-		{
-			.gpu_freq = 380000000,
-                        .bus_freq = 245760000,
-		},
+		/* LGE_CHANGE_S [peter.jung@lge.com]
+		    DoU Power consumption */
 		{
 			.gpu_freq = 355760000,
                         .bus_freq = 213760000,
 		},
+		/* LGE_CHANGE_E [peter.jung@lge.com] */
 		{
 			.gpu_freq = 320000000,
 			.bus_freq = 200000000,
@@ -932,7 +931,7 @@ static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 	.init_level = 0,
 	/* LGE_CHANGE_S [peter.jung@lge.com]
 	     DoU Power consumption */
-	.num_levels = 5,
+	.num_levels = 4,
 	/* LGE_CHANGE_S [peter.jung@lge.com] */
 	.set_grp_async = set_grp_xbar_async,
 	.idle_timeout = HZ,
