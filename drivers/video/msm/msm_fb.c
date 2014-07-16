@@ -98,10 +98,10 @@ static struct ion_client *iclient;
 
 u32 msm_fb_debug_enabled;
 /* Setting msm_fb_msg_level to 8 prints out ALL messages */
-u32 msm_fb_msg_level = 7;
+u32 msm_fb_msg_level = 0;
 
 /* Setting mddi_msg_level to 8 prints out ALL messages */
-u32 mddi_msg_level = 5;
+u32 mddi_msg_level = 0;
 
 /* LGE_CHANGE_S : LCD ESD Protection 
  * 2012-01-30, yoonsoo@lge.com
@@ -665,7 +665,7 @@ static int msm_fb_probe(struct platform_device *pdev)
 
 	vsync_cntrl.dev = mfd->fbi->dev;
 	mfd->panel_info.frame_count = 0;
-	mfd->bl_level = 0;
+	mfd->bl_level = 255;
 	bl_scale = 1024;
 	bl_min_lvl = 255;
 #ifdef CONFIG_FB_MSM_OVERLAY

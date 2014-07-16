@@ -160,32 +160,32 @@ static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu, u64 *wall)
 	u64 idle_time;
 	u64 cur_wall_time;
 	u64 busy_time;
-
+    
 	cur_wall_time = jiffies64_to_cputime64(get_jiffies_64());
-
+    
 	busy_time  = kcpustat_cpu(cpu).cpustat[CPUTIME_USER];
 	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_SYSTEM];
 	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_IRQ];
 	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_SOFTIRQ];
 	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_STEAL];
 	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_NICE];
-
+    
 	idle_time = cur_wall_time - busy_time;
 	if (wall)
 		*wall = jiffies_to_usecs(cur_wall_time);
-
+    
 	return jiffies_to_usecs(idle_time);
 }
 
 static inline cputime64_t get_cpu_idle_time(unsigned int cpu, cputime64_t *wall)
 {
 	u64 idle_time = get_cpu_idle_time_us(cpu, NULL);
-
+    
 	if (idle_time == -1ULL)
 		return get_cpu_idle_time_jiffy(cpu, wall);
 	else
 		idle_time += get_cpu_iowait_time_us(cpu, wall);
-
+    
 	return idle_time;
 }
 
@@ -899,14 +899,8 @@ static void do_dbs_timer(struct work_struct *work)
 			dbs_info->sample_type = DBS_SUB_SAMPLE;
 			delay = dbs_info->freq_hi_jiffies;
 		} else {
-			/* We want all CPUs to do sampling nearly on
-			 * same jiffy
-			 */
 			delay = usecs_to_jiffies(dbs_tuners_ins.sampling_rate
 				* dbs_info->rate_mult);
-
-			if (num_online_cpus() > 1)
-				delay -= jiffies % delay;
 		}
 	} else {
 		__cpufreq_driver_target(dbs_info->cur_policy,
@@ -1152,7 +1146,6 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		dbs_timer_exit(this_dbs_info);
 
 		mutex_lock(&dbs_mutex);
-		mutex_destroy(&this_dbs_info->timer_mutex);
 		dbs_enable--;
 		/* If device is being removed, policy is no longer
 		 * valid. */
@@ -1233,7 +1226,14 @@ static int __init cpufreq_gov_dbs_init(void)
 
 static void __exit cpufreq_gov_dbs_exit(void)
 {
+	unsigned int i;
+
 	cpufreq_unregister_governor(&cpufreq_gov_ondemand);
+	for_each_possible_cpu(i) {
+		struct cpu_dbs_info_s *this_dbs_info =
+			&per_cpu(od_cpu_dbs_info, i);
+		mutex_destroy(&this_dbs_info->timer_mutex);
+	}
 	destroy_workqueue(input_wq);
 }
 

@@ -61,7 +61,7 @@ obj-$(CONFIG_MSM_ETM) += msm-etm.o
 quiet_cmd_mkrpcsym = MKCAP   $@
       cmd_mkrpcsym = $(PERL) $(srctree)/$(src)/mkrpcsym.pl $< $@
 
-target += smd_rpc_sym.c
+targets += smd_rpc_sym.c
 $(obj)/smd_rpc_sym.c: $(src)/smd_rpc_sym $(src)/mkrpcsym.pl
 	$(call if_changed,mkrpcsym)
 
@@ -393,9 +393,12 @@ obj-$(CONFIG_MSM_RPM_SMD) += rpm-smd.o
 obj-$(CONFIG_MSM_CPR) += msm_cpr.o
 obj-$(CONFIG_MSM_VP_REGULATOR) += msm_vp.o
 
+obj-$(CONFIG_MSM_USE_USER_ACCESSIBLE_TIMERS) += timer_page.o
+
 ifdef CONFIG_MSM_CPR
 obj-$(CONFIG_DEBUG_FS) += msm_cpr-debug.o
 endif
+obj-$(CONFIG_FORCE_FAST_CHARGE) += fastchg.o
 # LGE_CHANGE : bohyun.jung@lge.com 
 # MSM_FIQ is only supported on msm8625. Do you include below files for all msm7x chipset.
 obj-$(CONFIG_MSM_FIQ) += msm7k_fiq.o

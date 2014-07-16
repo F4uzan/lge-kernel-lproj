@@ -223,7 +223,7 @@ u64 get_cpu_idle_time_us(int cpu, u64 *last_update_time)
 		update_ts_time_stats(cpu, ts, now, last_update_time);
 		idle = ts->idle_sleeptime;
 	} else {
-		if (ts->idle_active && !nr_iowait_cpu(cpu)) {
+		if (cpu_online(cpu) && ts->idle_active && !nr_iowait_cpu(cpu)) {
 			ktime_t delta = ktime_sub(now, ts->idle_entrytime);
 
 			idle = ktime_add(ts->idle_sleeptime, delta);
@@ -264,7 +264,8 @@ u64 get_cpu_iowait_time_us(int cpu, u64 *last_update_time)
 		update_ts_time_stats(cpu, ts, now, last_update_time);
 		iowait = ts->iowait_sleeptime;
 	} else {
-		if (ts->idle_active && nr_iowait_cpu(cpu) > 0) {
+		if (cpu_online(cpu) && ts->idle_active &&
+						nr_iowait_cpu(cpu) > 0) {
 			ktime_t delta = ktime_sub(now, ts->idle_entrytime);
 
 			iowait = ktime_add(ts->iowait_sleeptime, delta);
@@ -447,7 +448,6 @@ static void tick_nohz_stop_sched_tick(struct tick_sched *ts)
 out:
 	ts->next_jiffies = next_jiffies;
 	ts->last_jiffies = last_jiffies;
-	ts->sleep_length = ktime_sub(dev->next_event, now);
 }
 
 /**
@@ -500,12 +500,19 @@ void tick_nohz_idle_enter(void)
  */
 void tick_nohz_irq_exit(void)
 {
+	unsigned long flags;
 	struct tick_sched *ts = &__get_cpu_var(tick_cpu_sched);
 
 	if (!ts->inidle)
 		return;
 
+	local_irq_save(flags);
+
+	/* Cancel the timer because CPU already waken up from the C-states*/
+	menu_hrtimer_cancel();
 	tick_nohz_stop_sched_tick(ts);
+
+	local_irq_restore(flags);
 }
 
 /**
@@ -516,8 +523,8 @@ void tick_nohz_irq_exit(void)
 ktime_t tick_nohz_get_sleep_length(void)
 {
 	struct tick_sched *ts = &__get_cpu_var(tick_cpu_sched);
-
-	return ts->sleep_length;
+	struct clock_event_device *dev = __get_cpu_var(tick_cpu_device).evtdev;
+	return ktime_sub(dev->next_event, ts->idle_entrytime);
 }
 
 static void tick_nohz_restart(struct tick_sched *ts, ktime_t now)
@@ -568,6 +575,8 @@ void tick_nohz_idle_exit(void)
 
 	ts->inidle = 0;
 
+	/* Cancel the timer because CPU already waken up from the C-states*/
+	menu_hrtimer_cancel();
 	if (ts->idle_active || ts->tick_stopped)
 		now = ktime_get();
 
@@ -921,7 +930,7 @@ void tick_cancel_sched_timer(int cpu)
 		hrtimer_cancel(&ts->sched_timer);
 # endif
 
-	ts->nohz_mode = NOHZ_MODE_INACTIVE;
+	memset(ts, 0, sizeof(*ts));
 }
 #endif
 
