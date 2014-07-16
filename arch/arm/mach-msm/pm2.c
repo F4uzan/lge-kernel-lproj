@@ -861,9 +861,6 @@ static int msm_pm_power_collapse
 	int val;
 	int modem_early_exit = 0;
 
-	/* Clear "reserved1" variable in msm_pm_smem_data */
-	msm_pm_smem_data->reserved1 = 0x0;
-
 	MSM_PM_DPRINTK(MSM_PM_DEBUG_SUSPEND|MSM_PM_DEBUG_POWER_COLLAPSE,
 		KERN_INFO, "%s(): idle %d, delay %u, limit %u\n", __func__,
 		(int)from_idle, sleep_delay, sleep_limit);
@@ -955,7 +952,7 @@ static int msm_pm_power_collapse
 
 	if (saved_acpuclk_rate == 0) {
 		msm_pm_config_hw_after_power_up();
-		goto acpu_switch_fail;
+		goto power_collapse_early_exit;
 	}
 
 	msm_pm_boot_config_before_pc(smp_processor_id(),
@@ -1129,11 +1126,6 @@ static int msm_pm_power_collapse
 		msm_cpr_ops->cpr_resume();
 
 	return 0;
-
-acpu_switch_fail:
-	msm_pm_irq_extns->exit_sleep1(msm_pm_smem_data->irq_mask,
-		msm_pm_smem_data->wakeup_reason,
-		msm_pm_smem_data->pending_irqs);
 
 power_collapse_early_exit:
 	/* Enter PWRC_EARLY_EXIT */
@@ -1342,8 +1334,7 @@ void arch_idle(void)
 	unsigned int cpu;
 	int64_t t1;
 	static DEFINE_PER_CPU(int64_t, t2);
-	volatile int exit_stat;
-	bool low_power = false;
+	int exit_stat;
 
 	if (!atomic_read(&msm_pm_init_done))
 		return;
@@ -1351,7 +1342,7 @@ void arch_idle(void)
 	cpu = smp_processor_id();
 	latency_qos = pm_qos_request(PM_QOS_CPU_DMA_LATENCY);
 	/* get the next timer expiration */
-	timer_expiration = msm_timer_enter_idle();
+	timer_expiration = ktime_to_ns(tick_nohz_get_sleep_length());
 
 	t1 = ktime_to_ns(ktime_get());
 	msm_pm_add_stat(MSM_PM_STAT_NOT_IDLE, t1 - __get_cpu_var(t2));
@@ -1411,10 +1402,12 @@ void arch_idle(void)
 		/* Sync the timer with SCLK, it is needed only for modem
 		 * assissted pollapse case.
 		 */
+		int64_t next_timer_exp = msm_timer_enter_idle();
 		uint32_t sleep_delay;
+		bool low_power = false;
 
 		sleep_delay = (uint32_t) msm_pm_convert_and_cap_time(
-			timer_expiration, MSM_PM_SLEEP_TICK_LIMIT);
+			next_timer_exp, MSM_PM_SLEEP_TICK_LIMIT);
 
 		if (sleep_delay == 0) /* 0 would mean infinite time */
 			sleep_delay = 1;
@@ -1430,6 +1423,7 @@ void arch_idle(void)
 
 		ret = msm_pm_power_collapse(true, sleep_delay, sleep_limit);
 		low_power = (ret != -EBUSY && ret != -ETIMEDOUT);
+		msm_timer_exit_idle(low_power);
 
 		if (ret)
 			exit_stat = MSM_PM_STAT_IDLE_FAILED_POWER_COLLAPSE;
@@ -1457,7 +1451,6 @@ void arch_idle(void)
 		exit_stat = MSM_PM_STAT_IDLE_SPIN;
 	}
 
-	msm_timer_exit_idle(low_power);
 	__get_cpu_var(t2) = ktime_to_ns(ktime_get());
 	msm_pm_add_stat(exit_stat, __get_cpu_var(t2) - t1);
 }

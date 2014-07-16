@@ -593,7 +593,6 @@ static DEFINE_VDD_CLASS(vdd_dig, set_vdd_dig);
 #define RPM_MEM_CLK_TYPE  0x326b6c63
 
 #define CXO_ID		0x0
-#define QDSS_ID		0x1
 
 #define PNOC_ID		0x0
 #define SNOC_ID		0x1
@@ -612,7 +611,6 @@ DEFINE_CLK_RPM_SMD(ocmemgx_clk, ocmemgx_a_clk, RPM_MEM_CLK_TYPE, OCMEM_ID,
 
 DEFINE_CLK_RPM_SMD_BRANCH(cxo_clk_src, cxo_a_clk_src,
 				RPM_MISC_CLK_TYPE, CXO_ID, 19200000);
-DEFINE_CLK_RPM_SMD_QDSS(qdss_clk, qdss_a_clk, RPM_MISC_CLK_TYPE, QDSS_ID);
 
 static struct pll_vote_clk gpll0_clk_src = {
 	.en_reg = (void __iomem *)APCS_GPLL_ENA_VOTE_REG,
@@ -625,6 +623,7 @@ static struct pll_vote_clk gpll0_clk_src = {
 		.rate = 600000000,
 		.dbg_name = "gpll0_clk_src",
 		.ops = &clk_ops_pll_vote,
+		.warned = true,
 		CLK_INIT(gpll0_clk_src.c),
 	},
 };
@@ -640,6 +639,7 @@ static struct pll_vote_clk gpll1_clk_src = {
 		.rate = 480000000,
 		.dbg_name = "gpll1_clk_src",
 		.ops = &clk_ops_pll_vote,
+		.warned = true,
 		CLK_INIT(gpll1_clk_src.c),
 	},
 };
@@ -655,6 +655,7 @@ static struct pll_vote_clk lpapll0_clk_src = {
 		.rate = 491520000,
 		.dbg_name = "lpapll0_clk_src",
 		.ops = &clk_ops_pll_vote,
+		.warned = true,
 		CLK_INIT(lpapll0_clk_src.c),
 	},
 };
@@ -670,6 +671,7 @@ static struct pll_vote_clk mmpll0_clk_src = {
 		.dbg_name = "mmpll0_clk_src",
 		.rate = 800000000,
 		.ops = &clk_ops_pll_vote,
+		.warned = true,
 		CLK_INIT(mmpll0_clk_src.c),
 	},
 };
@@ -685,6 +687,7 @@ static struct pll_vote_clk mmpll1_clk_src = {
 		.dbg_name = "mmpll1_clk_src",
 		.rate = 1000000000,
 		.ops = &clk_ops_pll_vote,
+		.warned = true,
 		CLK_INIT(mmpll1_clk_src.c),
 	},
 };
@@ -4827,36 +4830,6 @@ static struct clk_lookup msm_clocks_8974[] = {
 	CLK_LOOKUP("bus_a_clk",	ocmemnoc_clk.c,		"msm_ocmem_noc"),
 	CLK_LOOKUP("bus_clk",	mmss_mmssnoc_axi_clk.c,	"msm_mmss_noc"),
 	CLK_LOOKUP("bus_a_clk",	mmss_mmssnoc_axi_clk.c,	"msm_mmss_noc"),
-
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-tmc-etr"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-tpiu"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-replicator"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-tmc-etf"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-funnel-merg"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-funnel-in0"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-funnel-in1"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-funnel-kpss"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-funnel-mmss"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-stm"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-etm0"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-etm1"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-etm2"),
-	CLK_LOOKUP("core_clk", qdss_clk.c, "coresight-etm3"),
-
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-tmc-etr"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-tpiu"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-replicator"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-tmc-etf"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-funnel-merg"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-funnel-in0"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-funnel-in1"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-funnel-kpss"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-funnel-mmss"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-stm"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-etm0"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-etm1"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-etm2"),
-	CLK_LOOKUP("core_a_clk", qdss_a_clk.c, "coresight-etm3"),
 };
 
 static struct pll_config_regs gpll0_regs __initdata = {

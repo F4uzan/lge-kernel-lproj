@@ -1079,10 +1079,6 @@ static int hub_configure(struct usb_hub *hub,
 		message = "hub has too many ports!";
 		ret = -ENODEV;
 		goto fail;
-	} else if (hub->descriptor->bNbrPorts == 0) {
-		message = "hub doesn't have any ports!";
-		ret = -ENODEV;
-		goto fail;
 	}
 
 	hdev->maxchild = hub->descriptor->bNbrPorts;
@@ -3169,7 +3165,6 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 			!(hcd->driver->flags & HCD_USB3) &&
 			!(hcd->driver->flags & HCD_OLD_ENUM)) {
 			struct usb_device_descriptor *buf;
-			ushort idvendor;
 			int r = 0;
 
 #define GET_DESCRIPTOR_BUFSIZE	64
@@ -3208,7 +3203,6 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 			}
 			udev->descriptor.bMaxPacketSize0 =
 					buf->bMaxPacketSize0;
-			idvendor = le16_to_cpu(buf->idVendor);
 			kfree(buf);
 
 			/*
@@ -3216,7 +3210,7 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 			 * second reset which results in failure due to
 			 * speed change.
 			 */
-			if (idvendor != 0x1a0a) {
+			if (le16_to_cpu(buf->idVendor) != 0x1a0a) {
 				retval = hub_port_reset(hub, port1, udev,
 							 delay, false);
 				if (retval < 0)	/* error or disconnect */

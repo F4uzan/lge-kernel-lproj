@@ -487,6 +487,7 @@ static struct pll_clk pll2_clk = {
 		.rate = 800000000,
 		.ops = &clk_ops_local_pll,
 		CLK_INIT(pll2_clk.c),
+		.warned = true,
 	},
 };
 
@@ -500,6 +501,7 @@ static struct pll_clk pll3_clk = {
 		.vdd_class = &vdd_sr2_hdmi_pll,
 		.fmax[VDD_SR2_HDMI_PLL_ON] = ULONG_MAX,
 		CLK_INIT(pll3_clk.c),
+		.warned = true,
 	},
 };
 
@@ -514,6 +516,7 @@ static struct pll_vote_clk pll4_clk = {
 		.rate = 393216000,
 		.ops = &clk_ops_pll_vote,
 		CLK_INIT(pll4_clk.c),
+		.warned = true,
 	},
 };
 
@@ -528,6 +531,7 @@ static struct pll_vote_clk pll8_clk = {
 		.rate = 384000000,
 		.ops = &clk_ops_pll_vote,
 		CLK_INIT(pll8_clk.c),
+		.warned = true,
 	},
 };
 
@@ -542,6 +546,7 @@ static struct pll_vote_clk pll14_clk = {
 		.rate = 480000000,
 		.ops = &clk_ops_pll_vote,
 		CLK_INIT(pll14_clk.c),
+		.warned = true,
 	},
 };
 
@@ -553,6 +558,7 @@ static struct pll_clk pll15_clk = {
 		.rate = 975000000,
 		.ops = &clk_ops_local_pll,
 		CLK_INIT(pll15_clk.c),
+		.warned = true,
 	},
 };
 
@@ -2839,7 +2845,6 @@ static struct clk *pix_rdi_mux_map[] = {
 };
 
 struct pix_rdi_clk {
-	bool prepared;
 	bool enabled;
 	unsigned long cur_rate;
 
@@ -2865,7 +2870,6 @@ static int pix_rdi_clk_set_rate(struct clk *c, unsigned long rate)
 	unsigned long flags;
 	struct pix_rdi_clk *rdi = to_pix_rdi_clk(c);
 	struct clk **mux_map = pix_rdi_mux_map;
-	unsigned long old_rate = rdi->cur_rate;
 
 	/*
 	 * These clocks select three inputs via two muxes. One mux selects
@@ -2876,7 +2880,7 @@ static int pix_rdi_clk_set_rate(struct clk *c, unsigned long rate)
 	 * needs to be on at what time.
 	 */
 	for (i = 0; mux_map[i]; i++) {
-		ret = clk_prepare_enable(mux_map[i]);
+		ret = clk_enable(mux_map[i]);
 		if (ret)
 			goto err;
 	}
@@ -2885,21 +2889,11 @@ static int pix_rdi_clk_set_rate(struct clk *c, unsigned long rate)
 		goto err;
 	}
 	/* Keep the new source on when switching inputs of an enabled clock */
-	if (rdi->prepared) {
-		ret = clk_prepare(mux_map[rate]);
-		if (ret)
-			goto err;
-	}
-	spin_lock_irqsave(&c->lock, flags);
 	if (rdi->enabled) {
-		ret = clk_enable(mux_map[rate]);
-		if (ret) {
-			spin_unlock_irqrestore(&c->lock, flags);
-			clk_unprepare(mux_map[rate]);
-			goto err;
-		}
+		clk_disable(mux_map[rdi->cur_rate]);
+		clk_enable(mux_map[rate]);
 	}
-	spin_lock(&local_clock_reg_lock);
+	spin_lock_irqsave(&local_clock_reg_lock, flags);
 	reg = readl_relaxed(rdi->s2_reg);
 	reg &= ~rdi->s2_mask;
 	reg |= rate == 2 ? rdi->s2_mask : 0;
@@ -2921,16 +2915,10 @@ static int pix_rdi_clk_set_rate(struct clk *c, unsigned long rate)
 	mb();
 	udelay(1);
 	rdi->cur_rate = rate;
-	spin_unlock(&local_clock_reg_lock);
-
-	if (rdi->enabled)
-		clk_disable(mux_map[old_rate]);
-	spin_unlock_irqrestore(&c->lock, flags);
-	if (rdi->prepared)
-		clk_unprepare(mux_map[old_rate]);
+	spin_unlock_irqrestore(&local_clock_reg_lock, flags);
 err:
 	for (i--; i >= 0; i--)
-		clk_disable_unprepare(mux_map[i]);
+		clk_disable(mux_map[i]);
 
 	return 0;
 }
@@ -2938,13 +2926,6 @@ err:
 static unsigned long pix_rdi_clk_get_rate(struct clk *c)
 {
 	return to_pix_rdi_clk(c)->cur_rate;
-}
-
-static int pix_rdi_clk_prepare(struct clk *c)
-{
-	struct pix_rdi_clk *rdi = to_pix_rdi_clk(c);
-	rdi->prepared = true;
-	return 0;
 }
 
 static int pix_rdi_clk_enable(struct clk *c)
@@ -2969,12 +2950,6 @@ static void pix_rdi_clk_disable(struct clk *c)
 	__branch_disable_reg(&rdi->b, rdi->c.dbg_name);
 	spin_unlock_irqrestore(&local_clock_reg_lock, flags);
 	rdi->enabled = false;
-}
-
-static void pix_rdi_clk_unprepare(struct clk *c)
-{
-	struct pix_rdi_clk *rdi = to_pix_rdi_clk(c);
-	rdi->prepared = false;
 }
 
 static int pix_rdi_clk_reset(struct clk *c, enum clk_reset_action action)
@@ -3013,10 +2988,8 @@ static enum handoff pix_rdi_clk_handoff(struct clk *c)
 }
 
 static struct clk_ops clk_ops_pix_rdi_8960 = {
-	.prepare = pix_rdi_clk_prepare,
 	.enable = pix_rdi_clk_enable,
 	.disable = pix_rdi_clk_disable,
-	.unprepare = pix_rdi_clk_unprepare,
 	.handoff = pix_rdi_clk_handoff,
 	.set_rate = pix_rdi_clk_set_rate,
 	.get_rate = pix_rdi_clk_get_rate,

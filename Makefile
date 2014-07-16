@@ -1,7 +1,7 @@
 VERSION = 3
 PATCHLEVEL = 4
 SUBLEVEL = 11
-EXTRAVERSION =
+EXTRAVERSION = a
 NAME = Saber-toothed Squirrel
 
 # *DOCUMENTATION*
@@ -243,13 +243,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	  else if [ -x /bin/bash ]; then echo /bin/bash; \
 	  else echo sh; fi ; fi)
 
-ifdef CONFIG_CCACHE
-HOSTCC       = ccache gcc
-HOSTCXX      = ccache g++
-else
 HOSTCC       = gcc
 HOSTCXX      = g++
-endif
 HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer
 HOSTCXXFLAGS = -O2
 
@@ -335,11 +330,7 @@ include $(srctree)/scripts/Kbuild.include
 
 AS		= $(CROSS_COMPILE)as
 LD		= $(CROSS_COMPILE)ld
-ifdef CONFIG_CCACHE
-REAL_CC		= ccache $(CROSS_COMPILE)gcc
-else
 REAL_CC		= $(CROSS_COMPILE)gcc
-endif
 CPP		= $(CC) -E
 AR		= $(CROSS_COMPILE)ar
 NM		= $(CROSS_COMPILE)nm
@@ -590,7 +581,7 @@ endif # $(dot-config)
 all: vmlinux
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
+KBUILD_CFLAGS	+= -Os
 else
 KBUILD_CFLAGS	+= -O2
 endif

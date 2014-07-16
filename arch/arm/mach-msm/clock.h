@@ -115,6 +115,7 @@ struct clk_ops {
  * @depends: non-direct parent of clock to enable when this clock is enabled
  * @vdd_class: voltage scaling requirement class
  * @fmax: maximum frequency in Hz supported at each voltage level
+ * @warned: true if the clock has warned of incorrect usage, false otherwise
  */
 struct clk {
 	uint32_t flags;
@@ -128,6 +129,7 @@ struct clk {
 	struct list_head children;
 	struct list_head siblings;
 
+	bool warned;
 	unsigned count;
 	spinlock_t lock;
 	unsigned prepare_count;
@@ -173,14 +175,13 @@ extern struct clock_init_data msm8974_clock_init_data;
 void msm_clock_init(struct clock_init_data *data);
 int vote_vdd_level(struct clk_vdd_class *vdd_class, int level);
 int unvote_vdd_level(struct clk_vdd_class *vdd_class, int level);
-int find_vdd_level(struct clk *clk, unsigned long rate);
 
 #ifdef CONFIG_DEBUG_FS
 int clock_debug_init(struct clock_init_data *data);
 int clock_debug_add(struct clk *clock);
 void clock_debug_print_enabled(void);
 #else
-static inline int clock_debug_init(struct clock_init_data *data) { return 0; }
+static inline int clock_debug_init(struct clk_init_data *data) { return 0; }
 static inline int clock_debug_add(struct clk *clock) { return 0; }
 static inline void clock_debug_print_enabled(void) { return; }
 #endif
